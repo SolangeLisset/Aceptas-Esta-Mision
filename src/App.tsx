@@ -1,9 +1,10 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { Coffee, Heart, Play } from 'lucide-react';
+import { CheckCircle2, Coffee, Heart, Play } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Celebration } from './components/Celebration';
 import { DodgePigeons, FeedCat, MiniGameHotdogs } from './components/MiniGameHotdogs';
 import { HiddenClues } from './components/HiddenClues';
+import { MemeCatCard } from './components/MemeCatCard';
 import { PixelButton } from './components/PixelButton';
 import { PixelCat } from './components/PixelCat';
 import { SceneFrame } from './components/SceneFrame';
@@ -19,6 +20,12 @@ const activityOptions = [
   { label: 'Pelicula', icon: '🎬', detail: 'pelicula y comentario experto de snacks' },
   { label: 'Paseo', icon: '🌿', detail: 'paseo tranquilo sin mision secundaria obligatoria' },
 ];
+type ActivityOption = (typeof activityOptions)[number];
+
+const memeCatImages = {
+  intro: 'https://cataas.com/cat/says/SOLO%20ELEGIDOS?fontSize=42&fontColor=white',
+  final: 'https://cataas.com/cat/says/NO%20SEAS%20NPC?fontSize=42&fontColor=white',
+};
 
 type DateOption = {
   label: string;
@@ -32,7 +39,7 @@ export function App() {
   const [sound, setSound] = usePersistentState('aceptar-la-mision.sound', true);
   const [showDateInvite, setShowDateInvite] = useState(false);
   const [missionAccepted, setMissionAccepted] = useState(false);
-  const [selectedActivity, setSelectedActivity] = useState(activityOptions[0]);
+  const [selectedActivity, setSelectedActivity] = useState<ActivityOption | null>(null);
   const [selectedDate, setSelectedDate] = useState<DateOption | null>(null);
   const [rejectDodges, setRejectDodges] = useState(0);
   const [rejectPosition, setRejectPosition] = useState({ x: 0, y: 0 });
@@ -73,7 +80,7 @@ export function App() {
     play('click');
   };
 
-  const chooseActivity = (activity: (typeof activityOptions)[number]) => {
+  const chooseActivity = (activity: ActivityOption) => {
     setSelectedActivity(activity);
     setShowDateInvite(false);
     play('catch');
@@ -137,9 +144,8 @@ export function App() {
           {scene === 'intro' && (
             <div className="scene-card min-h-[76vh]">
               <HiddenClues />
-              <motion.div className="meme-face" animate={{ rotate: [-2, 2, -2] }} transition={{ repeat: Infinity, duration: 1.8 }}>
-                <span>🥺</span>
-                <strong>mision.exe</strong>
+              <motion.div animate={{ rotate: [-2, 2, -2] }} transition={{ repeat: Infinity, duration: 1.8 }}>
+                <MemeCatCard caption="mision.exe pide permiso para ponerse rara" imageUrl={memeCatImages.intro} />
               </motion.div>
               <h2 className="max-w-2xl text-center font-pixel text-xl leading-9 sm:text-3xl">Solo las personas elegidas pueden completar esta mision.</h2>
               <PixelButton onClick={() => go('hotdogs')}>Aceptar</PixelButton>
@@ -171,7 +177,11 @@ export function App() {
 
           {scene === 'final' && (
             <div className="scene-card min-h-[78vh] text-center">
-              <PixelCat mood="coffee" size="lg" />
+              <div className="grid w-full max-w-4xl items-center gap-5 sm:grid-cols-[180px_1fr_180px]">
+                <MemeCatCard caption="el gato ya sabe" imageUrl={memeCatImages.final} tone="blue" />
+                <PixelCat mood="coffee" size="lg" />
+                <MemeCatCard caption="cara cuando toca elegir" imageUrl="https://cataas.com/cat/says/ACEPTA%20PO?fontSize=44&fontColor=white" tone="pink" />
+              </div>
               <h2 className="font-pixel text-2xl leading-10 sm:text-4xl">🏆 Mision secreta desbloqueada.</h2>
               <div className="max-w-3xl space-y-4 text-lg leading-8">
                 <p>La verdadera mision nunca fueron los minijuegos.</p>
@@ -194,7 +204,7 @@ export function App() {
                   </span>
                 </PixelButton>
                 <AnimatePresence>
-                  {missionAccepted && (
+                  {missionAccepted && selectedActivity && (
                     <motion.div
                       initial={{ opacity: 0, x: 20, scale: 0.95 }}
                       animate={{ opacity: 1, x: 0, scale: 1 }}
@@ -245,11 +255,19 @@ export function App() {
                     {activityOptions.map((activity) => (
                       <button
                         key={activity.label}
-                        className={`rounded-md border-4 border-stone-800 px-3 py-4 text-left shadow-[4px_4px_0_rgba(41,37,36,.18)] transition hover:-translate-y-1 ${
-                          selectedActivity.label === activity.label ? 'bg-rose-200 text-stone-950' : 'bg-white/80 text-stone-900'
+                        className={`relative rounded-md border-4 px-3 py-4 text-left shadow-[4px_4px_0_rgba(41,37,36,.18)] transition hover:-translate-y-1 ${
+                          selectedActivity?.label === activity.label
+                            ? 'border-rose-700 bg-rose-200 text-stone-950 ring-4 ring-rose-300'
+                            : 'border-stone-800 bg-white/80 text-stone-900'
                         }`}
                         onClick={() => chooseActivity(activity)}
+                        aria-pressed={selectedActivity?.label === activity.label}
                       >
+                        {selectedActivity?.label === activity.label && (
+                          <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded bg-rose-700 px-2 py-1 text-[10px] font-black uppercase text-white">
+                            <CheckCircle2 size={14} /> Elegido
+                          </span>
+                        )}
                         <span className="mb-2 block text-3xl">{activity.icon}</span>
                         <strong className="block font-pixel text-[10px]">{activity.label}</strong>
                         <span className="mt-2 block text-sm leading-5">{activity.detail}</span>
@@ -267,7 +285,7 @@ export function App() {
                     exit={{ opacity: 0, y: -12, scale: 0.96 }}
                   >
                     <p className="mb-4 font-pixel text-[10px] leading-5 sm:text-xs">
-                      Coordenadas para {selectedActivity.detail}:
+                      Coordenadas para {selectedActivity?.detail}:
                     </p>
                     <div className="grid gap-3 sm:grid-cols-3">
                       {dateOptions.map((option) => (
@@ -292,7 +310,7 @@ export function App() {
           {scene === 'credits' && (
             <div className="flex min-h-[78vh] flex-col items-center justify-center gap-7 rounded-md bg-black p-8 text-center text-white shadow-pixel">
               <p className="font-pixel text-lg leading-9 sm:text-3xl">Gracias por llegar hasta aqui.</p>
-              {selectedDate && (
+              {selectedDate && selectedActivity && (
                 <div className="max-w-2xl rounded-md border-4 border-rose-200 bg-white/10 p-5 text-left shadow-glow">
                   <p className="mb-3 font-pixel text-[10px] leading-5 text-rose-200 sm:text-xs">Resumen oficial de la mision:</p>
                   <p className="text-lg leading-8">
