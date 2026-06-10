@@ -46,7 +46,9 @@ export function App() {
 
   const go = (next: Scene) => {
     play('click');
-    startMusic(next === 'reveal' || next === 'final');
+    if (next === 'reveal' || next === 'final') {
+      startMusic(true);
+    }
     setScene(next);
   };
 

@@ -7,7 +7,8 @@ type FallingItem = {
   id: number;
   kind: 'hotdog' | 'rock';
   left: number;
-  duration: number;
+  top: number;
+  speed: number;
 };
 
 type MiniGameHotdogsProps = {
@@ -21,7 +22,6 @@ export function MiniGameHotdogs({ onComplete, playSound }: MiniGameHotdogsProps)
   const [items, setItems] = useState<FallingItem[]>([]);
   const [catcherLeft, setCatcherLeft] = useState(50);
   const catcherLeftRef = useRef(catcherLeft);
-  const resolvedItemsRef = useRef(new Set<number>());
 
   useEffect(() => {
     catcherLeftRef.current = catcherLeft;
@@ -29,33 +29,44 @@ export function MiniGameHotdogs({ onComplete, playSound }: MiniGameHotdogsProps)
 
   useEffect(() => {
     const timer = window.setInterval(() => setTime((current) => current - 1), 1000);
-    const landingTimers: number[] = [];
     const spawner = window.setInterval(() => {
       const item: FallingItem = {
         id: Date.now() + Math.random(),
         kind: Math.random() > 0.22 ? 'hotdog' : 'rock',
         left: 8 + Math.random() * 84,
-        duration: 3.3 + Math.random() * 1.6,
+        top: -12,
+        speed: 0.85 + Math.random() * 0.55,
       };
 
       setItems((current) => [...current.slice(-12), item]);
-      const landingTimer = window.setTimeout(() => {
-        if (resolvedItemsRef.current.has(item.id)) return;
-        resolvedItemsRef.current.add(item.id);
-        setItems((current) => current.filter((candidate) => candidate.id !== item.id));
-
-        if (Math.abs(item.left - catcherLeftRef.current) <= 12) {
-          setScore((current) => Math.max(0, current + (item.kind === 'hotdog' ? 10 : -7)));
-          playSound(item.kind === 'hotdog' ? 'catch' : 'bonk');
-        }
-      }, item.duration * 1000);
-
-      landingTimers.push(landingTimer);
     }, 560);
+    const physics = window.setInterval(() => {
+      setItems((current) => {
+        const nextItems: FallingItem[] = [];
+
+        current.forEach((item) => {
+          const nextItem = { ...item, top: item.top + item.speed };
+          const isInsideBasket = nextItem.top >= 76 && nextItem.top <= 91 && Math.abs(nextItem.left - catcherLeftRef.current) <= 11;
+
+          if (isInsideBasket) {
+            setScore((scoreValue) => Math.max(0, scoreValue + (nextItem.kind === 'hotdog' ? 10 : -7)));
+            playSound(nextItem.kind === 'hotdog' ? 'catch' : 'bonk');
+            return;
+          }
+
+          if (nextItem.top <= 105) {
+            nextItems.push(nextItem);
+          }
+        });
+
+        return nextItems;
+      });
+    }, 33);
+
     return () => {
       window.clearInterval(timer);
       window.clearInterval(spawner);
-      landingTimers.forEach((landingTimer) => window.clearTimeout(landingTimer));
+      window.clearInterval(physics);
     };
   }, [playSound]);
 
@@ -69,9 +80,11 @@ export function MiniGameHotdogs({ onComplete, playSound }: MiniGameHotdogsProps)
   useEffect(() => {
     const moveWithKeys = (event: KeyboardEvent) => {
       if (event.key === 'ArrowLeft' || event.key.toLowerCase() === 'a') {
+        event.preventDefault();
         setCatcherLeft((current) => Math.max(6, current - 7));
       }
       if (event.key === 'ArrowRight' || event.key.toLowerCase() === 'd') {
+        event.preventDefault();
         setCatcherLeft((current) => Math.min(90, current + 7));
       }
     };
@@ -81,7 +94,6 @@ export function MiniGameHotdogs({ onComplete, playSound }: MiniGameHotdogsProps)
   }, []);
 
   const catchItem = (item: FallingItem) => {
-    resolvedItemsRef.current.add(item.id);
     setItems((current) => current.filter((candidate) => candidate.id !== item.id));
     setScore((current) => Math.max(0, current + (item.kind === 'hotdog' ? 10 : -7)));
     playSound(item.kind === 'hotdog' ? 'catch' : 'bonk');
@@ -96,29 +108,18 @@ export function MiniGameHotdogs({ onComplete, playSound }: MiniGameHotdogsProps)
       </div>
       <div className="text-center">
         <h2 className="mb-2 font-pixel text-lg sm:text-2xl">Atrapa completos cosmicos</h2>
-        <p className="text-sm opacity-80">Mueve la canasta con el mouse, dedo o flechas. Las piedras arruinan la once.</p>
+        <p className="text-sm opacity-80">Mueve la canasta con flechas o A/D. Si el completo cae dentro, suma altiro.</p>
       </div>
       <div
         className="relative h-[52vh] min-h-96 overflow-hidden rounded-md border-4 border-stone-800 bg-sky-100/70 shadow-pixel dark:bg-slate-900/70"
-        onPointerMove={(event) => {
-          const bounds = event.currentTarget.getBoundingClientRect();
-          const nextLeft = ((event.clientX - bounds.left) / bounds.width) * 100;
-          setCatcherLeft(Math.min(90, Math.max(6, nextLeft)));
-        }}
-        onPointerDown={(event) => {
-          const bounds = event.currentTarget.getBoundingClientRect();
-          const nextLeft = ((event.clientX - bounds.left) / bounds.width) * 100;
-          setCatcherLeft(Math.min(90, Math.max(6, nextLeft)));
-        }}
       >
         {items.map((item) => (
           <motion.button
             key={item.id}
-            className="absolute top-0 text-4xl drop-shadow"
-            initial={{ y: -60, rotate: -12 }}
-            animate={{ y: '58vh', rotate: item.kind === 'rock' ? 90 : 20 }}
-            transition={{ duration: item.duration, ease: 'linear' }}
-            style={{ left: `${item.left}%` }}
+            className="absolute -translate-x-1/2 text-4xl drop-shadow"
+            animate={{ rotate: item.kind === 'rock' ? 90 : 20 }}
+            transition={{ duration: 0.25, ease: 'linear' }}
+            style={{ left: `${item.left}%`, top: `${item.top}%` }}
             onClick={() => catchItem(item)}
             title={item.kind === 'hotdog' ? 'Completo' : 'Piedra'}
           >
