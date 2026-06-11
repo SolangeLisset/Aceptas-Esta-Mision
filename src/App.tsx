@@ -128,7 +128,11 @@ export function App() {
             <div className="scene-card min-h-[76vh]">
               <HiddenClues />
               <div className="flex flex-col items-center gap-8 text-center">
-                <PixelCat mood="walk" size="lg" />
+                <MemeCatCard
+                  caption="Yo despues de aceptar una mision sin leer los terminos"
+                  imageUrl="/assets/meme-cats/gato-serio.webp"
+                  tone="dark"
+                />
                 <motion.h1 className="font-pixel text-2xl leading-10 sm:text-5xl" animate={{ textShadow: ['0 0 0 #fff', '0 0 18px #fff', '0 0 0 #fff'] }} transition={{ repeat: Infinity, duration: 2.2 }}>
                   El destino del universo depende de ti.
                 </motion.h1>
@@ -236,13 +240,20 @@ export function App() {
                 </motion.button>
               </div>
               {rejectDodges > 0 && (
-                <motion.p
-                  className="font-pixel text-[10px] leading-5 text-rose-700 dark:text-rose-200"
+                <motion.div
+                  className="flex flex-col items-center gap-4"
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                 >
-                  Error 404: rechazo no encontrado. La mision insiste amablemente.
-                </motion.p>
+                  <MemeCatCard
+                    caption="Opcion rechazada por el comite felino"
+                    imageUrl="/assets/meme-cats/gato-enojado.webp"
+                    tone="dark"
+                  />
+                  <p className="font-pixel text-[10px] leading-5 text-rose-700 dark:text-rose-200">
+                    Error 404: rechazo no encontrado. La mision insiste amablemente.
+                  </p>
+                </motion.div>
               )}
               {missionAccepted && (
                 <motion.div
@@ -279,26 +290,33 @@ export function App() {
               <AnimatePresence>
                 {showDateInvite && (
                   <motion.div
-                    className="w-full max-w-2xl rounded-md border-4 border-stone-800 bg-white/85 p-4 shadow-pixel dark:bg-stone-950/85"
+                    className="grid w-full max-w-4xl gap-5 rounded-md border-4 border-stone-800 bg-white/85 p-4 shadow-pixel dark:bg-stone-950/85 md:grid-cols-[220px_1fr]"
                     initial={{ opacity: 0, y: 18, scale: 0.96 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -12, scale: 0.96 }}
                   >
-                    <p className="mb-4 font-pixel text-[10px] leading-5 sm:text-xs">
-                      Coordenadas para {selectedActivity?.detail}:
-                    </p>
-                    <div className="grid gap-3 sm:grid-cols-3">
-                      {dateOptions.map((option) => (
-                        <button
-                          key={option.label}
-                          className="rounded-md border-4 border-stone-800 bg-amber-100 px-3 py-4 text-sm font-bold text-stone-950 shadow-[4px_4px_0_rgba(41,37,36,.18)] transition hover:-translate-y-1 hover:bg-amber-50"
-                          onClick={() => celebrateMission(option)}
-                        >
-                          {option.label}
-                        </button>
-                      ))}
+                    <MemeCatCard
+                      caption="Agenda ocupada fingiendo que no esperaba esto"
+                      imageUrl="/assets/meme-cats/gato-calendario.webp"
+                      tone="blue"
+                    />
+                    <div>
+                      <p className="mb-4 font-pixel text-[10px] leading-5 sm:text-xs">
+                        Coordenadas para {selectedActivity?.detail}:
+                      </p>
+                      <div className="grid gap-3 sm:grid-cols-3">
+                        {dateOptions.map((option) => (
+                          <button
+                            key={option.label}
+                            className="rounded-md border-4 border-stone-800 bg-amber-100 px-3 py-4 text-sm font-bold text-stone-950 shadow-[4px_4px_0_rgba(41,37,36,.18)] transition hover:-translate-y-1 hover:bg-amber-50"
+                            onClick={() => celebrateMission(option)}
+                          >
+                            {option.label}
+                          </button>
+                        ))}
+                      </div>
+                      <p className="mt-4 text-sm text-stone-700 dark:text-rose-100">Tambien acepto contraofertas bonitas.</p>
                     </div>
-                    <p className="mt-4 text-sm text-stone-700 dark:text-rose-100">Tambien acepto contraofertas bonitas.</p>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -309,6 +327,11 @@ export function App() {
 
           {scene === 'credits' && (
             <div className="flex min-h-[78vh] flex-col items-center justify-center gap-7 rounded-md bg-black p-8 text-center text-white shadow-pixel">
+              <MemeCatCard
+                caption="Mision cumplida, ahora toca ponerse nerviosos en persona"
+                imageUrl="/assets/meme-cats/gato-celebrando.webp"
+                tone="dark"
+              />
               <p className="font-pixel text-lg leading-9 sm:text-3xl">Gracias por llegar hasta aqui.</p>
               {selectedDate && selectedActivity && (
                 <div className="max-w-2xl rounded-md border-4 border-rose-200 bg-white/10 p-5 text-left shadow-glow">
