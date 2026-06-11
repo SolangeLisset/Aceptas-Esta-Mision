@@ -24,7 +24,6 @@ type ActivityOption = (typeof activityOptions)[number];
 
 const memeCatImages = {
   intro: 'https://cataas.com/cat/says/SOLO%20ELEGIDOS?fontSize=42&fontColor=white',
-  final: 'https://cataas.com/cat/says/NO%20SEAS%20NPC?fontSize=42&fontColor=white',
 };
 
 type DateOption = {
@@ -181,10 +180,22 @@ export function App() {
 
           {scene === 'final' && (
             <div className="scene-card min-h-[78vh] text-center">
-              <div className="grid w-full max-w-4xl items-center gap-5 sm:grid-cols-[180px_1fr_180px]">
-                <MemeCatCard caption="el gato ya sabe" imageUrl={memeCatImages.final} tone="blue" />
-                <PixelCat mood="coffee" size="lg" />
-                <MemeCatCard caption="cara cuando toca elegir" imageUrl="https://cataas.com/cat/says/ACEPTA%20PO?fontSize=44&fontColor=white" tone="pink" />
+              <div className="grid w-full max-w-3xl items-center justify-items-center gap-5 sm:grid-cols-[minmax(0,1fr)_110px_minmax(0,1fr)]">
+                <MemeCatCard
+                  caption="el gato ya sabe"
+                  imageUrl="/assets/meme-cats/gato-serio.webp"
+                  tone="blue"
+                  size="compact"
+                />
+                <div className="grid min-h-32 place-items-center">
+                  <PixelCat mood="coffee" size="lg" />
+                </div>
+                <MemeCatCard
+                  caption="cara cuando toca elegir"
+                  imageUrl="/assets/meme-cats/gato-enojado.webp"
+                  tone="pink"
+                  size="compact"
+                />
               </div>
               <h2 className="font-pixel text-2xl leading-10 sm:text-4xl">🏆 Mision secreta desbloqueada.</h2>
               <div className="max-w-3xl space-y-4 text-lg leading-8">
@@ -299,6 +310,7 @@ export function App() {
                       caption="Agenda ocupada fingiendo que no esperaba esto"
                       imageUrl="/assets/meme-cats/gato-calendario.webp"
                       tone="blue"
+                      size="compact"
                     />
                     <div>
                       <p className="mb-4 font-pixel text-[10px] leading-5 sm:text-xs">

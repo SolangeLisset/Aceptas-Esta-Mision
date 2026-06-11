@@ -4,9 +4,10 @@ type MemeCatCardProps = {
   caption: string;
   imageUrl: string;
   tone?: 'pink' | 'blue' | 'dark';
+  size?: 'large' | 'compact';
 };
 
-export function MemeCatCard({ caption, imageUrl, tone = 'pink' }: MemeCatCardProps) {
+export function MemeCatCard({ caption, imageUrl, tone = 'pink', size = 'large' }: MemeCatCardProps) {
   const [failed, setFailed] = useState(false);
   const toneClass = {
     pink: 'from-rose-200 to-amber-100',
@@ -15,7 +16,7 @@ export function MemeCatCard({ caption, imageUrl, tone = 'pink' }: MemeCatCardPro
   }[tone];
 
   return (
-    <figure className={`meme-cat-card bg-gradient-to-br ${toneClass}`}>
+    <figure className={`meme-cat-card meme-cat-card--${size} bg-gradient-to-br ${toneClass}`}>
       {!failed && (
         <img
           src={imageUrl}
